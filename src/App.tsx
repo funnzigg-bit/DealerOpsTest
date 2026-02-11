@@ -14,7 +14,10 @@ import SupportPage from "./pages/SupportPage";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import Dashboard from "./pages/app/Dashboard";
-import PlaceholderPage from "./pages/app/PlaceholderPage";
+import DocumentList from "./pages/app/documents/DocumentList";
+import ReviewBooster from "./pages/app/reviews/ReviewBooster";
+import SupportTickets from "./pages/app/support/SupportTickets";
+import BillingPage from "./pages/app/billing/BillingPage";
 import CustomerList from "./pages/app/customers/CustomerList";
 import CustomerCreate from "./pages/app/customers/CustomerCreate";
 import CustomerProfile from "./pages/app/customers/CustomerProfile";
@@ -39,9 +42,6 @@ import AuditLog from "./pages/app/audit/AuditLog";
 import SettingsPage from "./pages/app/settings/SettingsPage";
 import ReportsPage from "./pages/app/reports/ReportsPage";
 import NotFound from "./pages/NotFound";
-import {
-  Star, FolderOpen, MessageSquare, CreditCard
-} from "lucide-react";
 
 const queryClient = new QueryClient();
 
@@ -115,12 +115,12 @@ const App = () => (
               {/* Settings */}
               <Route path="settings" element={<SettingsPage />} />
 
-              {/* Remaining placeholders */}
-              <Route path="reviews" element={<PlaceholderPage title="Review Booster" description="Automated review request campaigns" icon={Star} />} />
-              <Route path="documents" element={<PlaceholderPage title="Documents" description="File manager and document generation" icon={FolderOpen} />} />
+              {/* More modules */}
+              <Route path="reviews" element={<ReviewBooster />} />
+              <Route path="documents" element={<DocumentList />} />
               <Route path="reports" element={<ReportsPage />} />
-              <Route path="support" element={<PlaceholderPage title="Support Tickets" description="Get help from the DealerOps team" icon={MessageSquare} />} />
-              <Route path="billing" element={<PlaceholderPage title="Billing & Plan" description="Manage your subscription" icon={CreditCard} />} />
+              <Route path="support" element={<SupportTickets />} />
+              <Route path="billing" element={<BillingPage />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
