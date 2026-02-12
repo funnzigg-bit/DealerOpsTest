@@ -20,10 +20,9 @@ import { format } from "date-fns";
 
 const statusColors: Record<string, string> = {
   draft: "bg-muted text-muted-foreground border-border",
-  issued: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+  sent: "bg-blue-500/10 text-blue-400 border-blue-500/20",
   paid: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
   cancelled: "bg-red-500/10 text-red-400 border-red-500/20",
-  sent: "bg-blue-500/10 text-blue-400 border-blue-500/20",
   overdue: "bg-amber-500/10 text-amber-400 border-amber-500/20",
 };
 
@@ -56,13 +55,13 @@ export default function InvoiceDetailModule() {
   const inv = invoice as any;
   const totalPaid = payments?.reduce((s: number, p: any) => s + Number(p.amount || 0), 0) ?? 0;
   const balanceDue = Number(inv.total || 0) - totalPaid;
-  const isLocked = inv.status === "issued" || inv.status === "paid" || inv.status === "cancelled";
+  const isLocked = inv.status === "sent" || inv.status === "paid" || inv.status === "cancelled";
 
   const handleIssue = async () => {
     try {
       await updateInvoice.mutateAsync({
         id: inv.id,
-        status: "issued" as any,
+        status: "sent" as any,
         issued_at: new Date().toISOString(),
         balance_due: balanceDue,
       });
@@ -276,12 +275,12 @@ export default function InvoiceDetailModule() {
               <Send className="h-4 w-4 mr-1" /> Issue Invoice
             </Button>
           )}
-          {(inv.status === "issued") && (
+          {(inv.status === "sent") && (
             <Button size="sm" onClick={() => setShowPaymentModal(true)}>
               <CreditCard className="h-4 w-4 mr-1" /> Record Payment
             </Button>
           )}
-          {(inv.status === "draft" || inv.status === "issued") && (
+          {(inv.status === "draft" || inv.status === "sent") && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="destructive" size="sm"><Ban className="h-4 w-4 mr-1" /> Cancel</Button>
@@ -372,7 +371,7 @@ export default function InvoiceDetailModule() {
           <div className="p-5 rounded-xl border border-border/50 bg-card/50">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-semibold">Payment Breakdown</h3>
-              {inv.status === "issued" && (
+              {inv.status === "sent" && (
                 <Button variant="outline" size="sm" onClick={() => setShowPaymentModal(true)}>
                   <Plus className="h-3 w-3 mr-1" /> Add Payment
                 </Button>
@@ -389,7 +388,7 @@ export default function InvoiceDetailModule() {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium">£{Number(p.amount).toFixed(2)}</span>
-                      {inv.status === "issued" && (
+                      {inv.status === "sent" && (
                         <Button
                           variant="ghost" size="icon" className="h-6 w-6"
                           onClick={() => deletePayment.mutate({ id: p.id, invoiceId: inv.id })}

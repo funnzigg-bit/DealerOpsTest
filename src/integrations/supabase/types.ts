@@ -2893,6 +2893,88 @@ export type Database = {
           },
         ]
       }
+      review_requests: {
+        Row: {
+          clicked_at: string | null
+          created_at: string
+          customer_email: string | null
+          customer_id: string | null
+          customer_name: string
+          customer_phone: string | null
+          dealer_id: string
+          id: string
+          notes: string | null
+          platform: string
+          review_rating: number | null
+          reviewed_at: string | null
+          sent_at: string | null
+          status: string
+          updated_at: string
+          vehicle_id: string | null
+          vehicle_info: string | null
+        }
+        Insert: {
+          clicked_at?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_id?: string | null
+          customer_name: string
+          customer_phone?: string | null
+          dealer_id: string
+          id?: string
+          notes?: string | null
+          platform?: string
+          review_rating?: number | null
+          reviewed_at?: string | null
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+          vehicle_id?: string | null
+          vehicle_info?: string | null
+        }
+        Update: {
+          clicked_at?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_id?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          dealer_id?: string
+          id?: string
+          notes?: string | null
+          platform?: string
+          review_rating?: number | null
+          reviewed_at?: string | null
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+          vehicle_id?: string | null
+          vehicle_info?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_requests_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_requests_dealer_id_fkey"
+            columns: ["dealer_id"]
+            isOneToOne: false
+            referencedRelation: "dealers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_requests_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       support_attachments: {
         Row: {
           created_at: string

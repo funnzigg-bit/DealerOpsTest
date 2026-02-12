@@ -18,7 +18,7 @@ export function useInvoices(search?: string, statusFilter?: string, tab?: string
         query = query.or(`invoice_number.ilike.%${search}%`);
       }
       if (tab === "drafts") query = query.eq("status", "draft" as any);
-      else if (tab === "issued") query = query.eq("status", "issued" as any);
+      else if (tab === "issued") query = query.eq("status", "sent" as any);
       else if (tab === "paid") query = query.eq("status", "paid" as any);
       else if (tab === "outstanding") query = query.eq("status", "issued" as any).gt("balance_due", 0);
       else if (statusFilter && statusFilter !== "all") query = query.eq("status", statusFilter as any);
