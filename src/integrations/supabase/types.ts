@@ -1393,6 +1393,77 @@ export type Database = {
           },
         ]
       }
+      dealer_announcements: {
+        Row: {
+          created_at: string
+          created_by_user_id: string | null
+          expires_at: string | null
+          id: string
+          message: string
+          priority: string
+          target_all_dealers: boolean
+          target_dealer_ids: string[] | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by_user_id?: string | null
+          expires_at?: string | null
+          id?: string
+          message: string
+          priority?: string
+          target_all_dealers?: boolean
+          target_dealer_ids?: string[] | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by_user_id?: string | null
+          expires_at?: string | null
+          id?: string
+          message?: string
+          priority?: string
+          target_all_dealers?: boolean
+          target_dealer_ids?: string[] | null
+          title?: string
+        }
+        Relationships: []
+      }
+      dealer_feature_flags: {
+        Row: {
+          dealer_id: string
+          enabled: boolean
+          feature_key: string
+          id: string
+          updated_at: string
+          updated_by_user_id: string | null
+        }
+        Insert: {
+          dealer_id: string
+          enabled?: boolean
+          feature_key: string
+          id?: string
+          updated_at?: string
+          updated_by_user_id?: string | null
+        }
+        Update: {
+          dealer_id?: string
+          enabled?: boolean
+          feature_key?: string
+          id?: string
+          updated_at?: string
+          updated_by_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dealer_feature_flags_dealer_id_fkey"
+            columns: ["dealer_id"]
+            isOneToOne: false
+            referencedRelation: "dealers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dealer_onboarding_events: {
         Row: {
           created_at: string | null
@@ -3754,6 +3825,13 @@ export type Database = {
     Functions: {
       get_user_dealer_id: { Args: never; Returns: string }
       has_dealer_access: { Args: { _dealer_id: string }; Returns: boolean }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_dealer_admin_or_super: {
         Args: { _dealer_id: string }
         Returns: boolean
