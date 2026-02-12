@@ -1,7 +1,8 @@
 import {
   LayoutDashboard, Users, Car, FileText, Shield, ShieldAlert, ShieldCheck, Wrench, CarFront,
   Target, ClipboardCheck, Star, FolderOpen, BarChart3, MessageSquare,
-  CreditCard, Settings, ScrollText, Search, LogOut, Building2, UsersRound, TrendingUp, Gauge, PackageCheck
+  CreditCard, Settings, ScrollText, Search, LogOut, Building2, UsersRound, TrendingUp, Gauge, PackageCheck,
+  HeartPulse, Megaphone, ToggleLeft, FileSearch
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
@@ -48,7 +49,11 @@ const adminNav = [
 ];
 
 const superAdminNav = [
+  { title: "Dealer Health", url: "/app/admin/health", icon: HeartPulse },
   { title: "Dealers", url: "/app/admin/dealers", icon: Building2 },
+  { title: "Announcements", url: "/app/admin/announcements", icon: Megaphone },
+  { title: "Feature Flags", url: "/app/admin/feature-flags", icon: ToggleLeft },
+  { title: "Audit Trail", url: "/app/admin/audit", icon: FileSearch },
   { title: "Billing Mgmt", url: "/app/admin/billing", icon: CreditCard },
   { title: "Support Inbox", url: "/app/admin/support", icon: MessageSquare },
 ];
