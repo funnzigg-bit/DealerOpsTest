@@ -26,16 +26,16 @@ const plans = [
       "Vehicle stock management",
       "Sale invoices & PDFs",
       "Basic warranties",
-      "10 vehicle checks/month",
-      "Email support (48h)",
+      "50 vehicle checks/month",
+      "Email support",
     ],
-    cta: "Request Access",
+    cta: "Start Free Trial",
     highlighted: false,
   },
   {
     name: "Professional",
-    monthly: 199,
-    annual: 159,
+    monthly: 125,
+    annual: 99,
     description: "For growing dealerships that need more",
     features: [
       "Up to 10 users",
@@ -45,29 +45,29 @@ const plans = [
       "Courtesy car tracking",
       "Leads pipeline CRM",
       "Review Booster",
-      "50 vehicle checks/month",
+      "200 vehicle checks/month",
       "Reports & KPIs",
-      "Priority support (24h)",
+      "Priority support",
     ],
-    cta: "Request Access",
+    cta: "Start Free Trial",
     highlighted: true,
   },
   {
-    name: "Enterprise",
-    monthly: null,
-    annual: null,
-    description: "For multi-site groups and high-volume dealers",
+    name: "Elite",
+    monthly: 199,
+    annual: 159,
+    description: "For high-volume and multi-site dealers",
     features: [
       "Unlimited users",
       "Everything in Professional",
-      "Multi-site management",
       "Unlimited vehicle checks",
-      "Custom integrations",
+      "Document storage",
       "Compliance centre",
+      "Audit logging",
       "Dedicated account manager",
       "SLA support",
     ],
-    cta: "Contact Us",
+    cta: "Start Free Trial",
     highlighted: false,
   },
 ];
@@ -78,7 +78,7 @@ const comparisonFeatures = [
   { name: "Vehicle Stock", starter: true, pro: true, enterprise: true },
   { name: "Sale Invoices & PDFs", starter: true, pro: true, enterprise: true },
   { name: "Warranties", starter: "Basic", pro: true, enterprise: true },
-  { name: "Vehicle Checks", starter: "10/mo", pro: "50/mo", enterprise: "Unlimited" },
+  { name: "Vehicle Checks", starter: "50/mo", pro: "200/mo", enterprise: "Unlimited" },
   { name: "Aftersales & Complaints", starter: false, pro: true, enterprise: true },
   { name: "CRA Shield", starter: false, pro: true, enterprise: true },
   { name: "Courtesy Cars", starter: false, pro: true, enterprise: true },
@@ -86,8 +86,8 @@ const comparisonFeatures = [
   { name: "Review Booster", starter: false, pro: true, enterprise: true },
   { name: "Reports & KPIs", starter: false, pro: true, enterprise: true },
   { name: "Compliance Centre", starter: false, pro: false, enterprise: true },
-  { name: "Multi-Site", starter: false, pro: false, enterprise: true },
-  { name: "Custom Integrations", starter: false, pro: false, enterprise: true },
+  { name: "Document Storage", starter: false, pro: false, enterprise: true },
+  { name: "Audit Logging", starter: false, pro: false, enterprise: true },
   { name: "Dedicated Account Manager", starter: false, pro: false, enterprise: true },
 ];
 
@@ -270,7 +270,7 @@ export default function Pricing() {
                       <th className="text-left p-3 font-medium text-foreground">Feature</th>
                       <th className="p-3 font-medium text-foreground text-center">Starter</th>
                       <th className="p-3 font-medium text-primary text-center">Professional</th>
-                      <th className="p-3 font-medium text-foreground text-center">Enterprise</th>
+                      <th className="p-3 font-medium text-foreground text-center">Elite</th>
                     </tr>
                   </thead>
                   <tbody>
