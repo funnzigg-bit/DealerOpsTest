@@ -342,7 +342,7 @@ export default function InvoiceCreateModule() {
             <p className="text-sm"><span className="text-muted-foreground">Subtotal:</span> £{subtotal.toLocaleString("en-GB", { minimumFractionDigits: 2 })}</p>
             <p className="text-sm"><span className="text-muted-foreground">VAT:</span> £{vatAmount.toLocaleString("en-GB", { minimumFractionDigits: 2 })}</p>
             {deliveryFee > 0 && <p className="text-sm"><span className="text-muted-foreground">Delivery:</span> £{deliveryFee.toLocaleString("en-GB", { minimumFractionDigits: 2 })}</p>}
-            {pxAllowance > 0 && <p className="text-sm"><span className="text-emerald-400">PX Allowance:</span> -£{pxAllowance.toLocaleString("en-GB", { minimumFractionDigits: 2 })}</p>}
+            {pxAllowance > 0 && <p className="text-sm"><span className="text-success">PX Allowance:</span> -£{pxAllowance.toLocaleString("en-GB", { minimumFractionDigits: 2 })}</p>}
             <p className="text-lg font-bold">Total: £{total.toLocaleString("en-GB", { minimumFractionDigits: 2 })}</p>
           </div>
         </div>
@@ -355,10 +355,20 @@ export default function InvoiceCreateModule() {
           </div>
           {pxEnabled && (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              <div>
-                <Label className="text-[10px] text-muted-foreground">PX Registration</Label>
-                <Input value={px.px_vrm} onChange={(e) => setPx({ ...px, px_vrm: e.target.value })} className="mt-1" />
-              </div>
+              <VrmLookup
+                value={px.px_vrm}
+                onChange={(v) => setPx({ ...px, px_vrm: v })}
+                onResult={(r) => {
+                  setPx(prev => ({
+                    ...prev,
+                    px_vrm: r.vrm || prev.px_vrm,
+                    px_make_model: (r.make && r.model) ? `${r.make} ${r.model}` : prev.px_make_model,
+                    px_vin: r.vin || prev.px_vin,
+                    px_mileage: r.latestMotMileage ? String(r.latestMotMileage) : prev.px_mileage,
+                  }));
+                }}
+                label="PX Registration"
+              />
               <div>
                 <Label className="text-[10px] text-muted-foreground">Make / Model</Label>
                 <Input value={px.px_make_model} onChange={(e) => setPx({ ...px, px_make_model: e.target.value })} className="mt-1" />

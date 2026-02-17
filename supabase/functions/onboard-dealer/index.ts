@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
       const { data: dealer } = await supabaseAdmin.from("dealers").select("*").eq("id", body.resend_dealer_id).single();
       if (!dealer) throw new Error("Dealer not found");
 
-      const emailBody = buildWelcomeEmail(dealer.name, dealer.email || "", "portal.dealerops.uk", null, true);
+      const emailBody = buildWelcomeEmail(dealer.name, dealer.email || "", "dealerops.uk/login", null, true);
 
       await supabaseAdmin.from("email_outbox").insert({
         dealer_id: dealer.id,
@@ -160,7 +160,7 @@ Deno.serve(async (req) => {
     const emailBody = buildWelcomeEmail(
       trading_name || legal_name,
       adminUserEmail,
-      "portal.dealerops.uk",
+      "dealerops.uk/login",
       resetLink || `Temporary password: ${tempPassword}`,
       false,
     );

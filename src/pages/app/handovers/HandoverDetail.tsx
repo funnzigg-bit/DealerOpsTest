@@ -204,9 +204,19 @@ export default function HandoverDetail() {
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={printHandover}><Printer className="h-4 w-4 mr-1" />Print PDF</Button>
           {h.status !== "completed" && h.status !== "cancelled" && (
-            <Button size="sm" onClick={() => { setShowSign(true); setSigName(""); }}>
-              <Pen className="h-4 w-4 mr-1" />Sign & Complete
-            </Button>
+            <>
+              <Button size="sm" variant="outline" onClick={async () => {
+                try {
+                  await updateHandover.mutateAsync({ id: id!, status: "completed", delivered_at: new Date().toISOString() });
+                  toast.success("Handover marked complete (no signature)");
+                } catch { toast.error("Failed to complete"); }
+              }}>
+                <Check className="h-4 w-4 mr-1" />Complete (No Sig)
+              </Button>
+              <Button size="sm" onClick={() => { setShowSign(true); setSigName(""); }}>
+                <Pen className="h-4 w-4 mr-1" />Sign & Complete
+              </Button>
+            </>
           )}
         </div>
       </div>
@@ -274,20 +284,43 @@ export default function HandoverDetail() {
               if (!sections[item.section]) sections[item.section] = [];
               sections[item.section].push(item);
             });
-            return Object.entries(sections).map(([section, sectionItems]) => (
-              <div key={section} className="mb-6">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-2">{SECTION_LABELS[section] || section}</h3>
-                <div className="space-y-1">
-                  {(sectionItems as any[]).map((item: any) => (
-                    <div key={item.id} className="flex items-center gap-3 p-3 rounded-lg border border-border/30 bg-card/30 hover:bg-card/50 transition-colors">
-                      <Checkbox checked={item.completed} onCheckedChange={() => toggleItem(item)} disabled={h.status === "completed"} />
-                      <span className={`text-sm flex-1 ${item.completed ? "line-through text-muted-foreground" : ""}`}>{item.item_label}</span>
-                      {item.completed_at && <span className="text-xs text-muted-foreground">{format(new Date(item.completed_at), "HH:mm")}</span>}
+            const allItems = items || [];
+            const allCompleted = allItems.length > 0 && allItems.every((i: any) => i.completed);
+            const handleSelectAll = async () => {
+              const target = !allCompleted;
+              for (const item of allItems) {
+                if (item.completed !== target) await toggleItem(item);
+              }
+            };
+            const SelectAllButton = () => (
+              <button
+                onClick={handleSelectAll}
+                disabled={h.status === "completed" || !allItems.length}
+                className="text-xs px-3 py-1 rounded-lg border border-border/50 hover:bg-muted/30 transition-colors disabled:opacity-40"
+              >
+                {allCompleted ? "Deselect All" : "Select All"}
+              </button>
+            );
+            return (
+              <div>
+                <div className="flex justify-end mb-3"><SelectAllButton /></div>
+                {Object.entries(sections).map(([section, sectionItems]) => (
+                  <div key={section} className="mb-6">
+                    <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-2">{SECTION_LABELS[section] || section}</h3>
+                    <div className="space-y-1">
+                      {(sectionItems as any[]).map((item: any) => (
+                        <div key={item.id} className="flex items-center gap-3 p-3 rounded-lg border border-border/30 bg-card/30 hover:bg-card/50 transition-colors">
+                          <Checkbox checked={item.completed} onCheckedChange={() => toggleItem(item)} disabled={h.status === "completed"} />
+                          <span className={`text-sm flex-1 ${item.completed ? "line-through text-muted-foreground" : ""}`}>{item.item_label}</span>
+                          {item.completed_at && <span className="text-xs text-muted-foreground">{format(new Date(item.completed_at), "HH:mm")}</span>}
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
+                <div className="flex justify-end mt-2"><SelectAllButton /></div>
               </div>
-            ));
+            );
           })()}
         </TabsContent>
 
