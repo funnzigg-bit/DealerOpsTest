@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,14 +8,18 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCreateVehicle } from "@/hooks/useVehicles";
-import { useUserDealerId } from "@/hooks/useCustomers";
+import { useUserDealerId, useCustomers } from "@/hooks/useCustomers";
 import { toast } from "sonner";
 import VrmLookup, { VrmLookupResult } from "@/components/app/VrmLookup";
 
 export default function VehicleCreate() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const create = useCreateVehicle();
   const { data: dealerId } = useUserDealerId();
+  const { data: customers } = useCustomers();
+  const preselectedCustomerId = searchParams.get("customer_id") || "";
+
   const [form, setForm] = useState({
     vrm: "", vin: "", make: "", model: "", derivative: "",
     year: "", mileage: "", fuel_type: "petrol" as const,
@@ -23,6 +27,7 @@ export default function VehicleCreate() {
     purchase_date: "", purchase_price: "", advertised_price: "",
     status: "in_stock" as const, location: "on_site" as const, notes: "",
   });
+  const [customerId, setCustomerId] = useState(preselectedCustomerId);
 
   const update = (field: string, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -63,9 +68,14 @@ export default function VehicleCreate() {
         status: form.status,
         location: form.location,
         notes: form.notes || null,
+        customer_id: customerId || null,
       });
       toast.success("Vehicle added");
-      navigate("/app/vehicles");
+      if (preselectedCustomerId) {
+        navigate(`/app/customers/${preselectedCustomerId}`);
+      } else {
+        navigate("/app/vehicles");
+      }
     } catch (err: any) {
       toast.error(err.message || "Failed to add vehicle");
     }
@@ -74,7 +84,7 @@ export default function VehicleCreate() {
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
       <div className="flex items-center gap-3 mb-6">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/app/vehicles")}>
+        <Button variant="ghost" size="icon" onClick={() => preselectedCustomerId ? navigate(`/app/customers/${preselectedCustomerId}`) : navigate("/app/vehicles")}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
@@ -84,6 +94,23 @@ export default function VehicleCreate() {
       </div>
 
       <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
+        {/* Customer Allocation */}
+        <div className="p-6 rounded-xl border border-border/50 bg-card/50 space-y-4">
+          <h3 className="text-sm font-semibold">Customer Allocation <span className="text-muted-foreground font-normal">(optional)</span></h3>
+          <div>
+            <Label className="text-xs">Assign to Customer</Label>
+            <Select value={customerId} onValueChange={setCustomerId}>
+              <SelectTrigger className="mt-1"><SelectValue placeholder="No customer assigned" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">No customer</SelectItem>
+                {customers?.map((c: any) => (
+                  <SelectItem key={c.id} value={c.id}>{c.first_name} {c.last_name}{c.phone ? ` · ${c.phone}` : ""}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
         <div className="p-6 rounded-xl border border-border/50 bg-card/50 space-y-4">
           <h3 className="text-sm font-semibold">Identity</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -209,7 +236,7 @@ export default function VehicleCreate() {
           <Button type="submit" disabled={create.isPending}>
             {create.isPending ? "Saving..." : "Add Vehicle"}
           </Button>
-          <Button type="button" variant="outline" onClick={() => navigate("/app/vehicles")}>Cancel</Button>
+          <Button type="button" variant="outline" onClick={() => preselectedCustomerId ? navigate(`/app/customers/${preselectedCustomerId}`) : navigate("/app/vehicles")}>Cancel</Button>
         </div>
       </form>
     </motion.div>

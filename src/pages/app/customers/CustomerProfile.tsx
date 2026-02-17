@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Save, Phone, Mail, MapPin, MessageSquare, Plus, Clock, Car, FileText, Shield, AlertTriangle, CheckSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -30,18 +30,29 @@ function LinkedVehicles({ customerId }: { customerId: string }) {
     },
   });
   if (isLoading) return <div className="h-20 rounded-lg bg-muted/30 animate-pulse" />;
-  if (!data?.length) return <EmptyState icon={Car} label="No vehicles linked" />;
   return (
-    <div className="space-y-2">
-      {data.map((v) => (
-        <div key={v.id} onClick={() => navigate(`/app/vehicles/${v.id}`)} className="p-3 rounded-lg border border-border/50 bg-card/50 hover:bg-muted/30 cursor-pointer transition-colors flex items-center justify-between">
-          <div>
-            <span className="text-sm font-mono font-medium text-primary">{v.vrm || "—"}</span>
-            <span className="text-sm text-muted-foreground ml-2">{[v.make, v.model].filter(Boolean).join(" ")}</span>
-          </div>
-          <StatusBadge status={v.status} />
+    <div className="space-y-3">
+      <div className="flex justify-end">
+        <button
+          onClick={() => navigate(`/app/vehicles/new?customer_id=${customerId}`)}
+          className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+        >
+          <Plus className="h-3.5 w-3.5" /> Add Vehicle
+        </button>
+      </div>
+      {!data?.length ? <EmptyState icon={Car} label="No vehicles linked" /> : (
+        <div className="space-y-2">
+          {data.map((v) => (
+            <div key={v.id} onClick={() => navigate(`/app/vehicles/${v.id}`)} className="p-3 rounded-lg border border-border/50 bg-card/50 hover:bg-muted/30 cursor-pointer transition-colors flex items-center justify-between">
+              <div>
+                <span className="text-sm font-mono font-medium text-primary">{v.vrm || "—"}</span>
+                <span className="text-sm text-muted-foreground ml-2">{[v.make, v.model].filter(Boolean).join(" ")}</span>
+              </div>
+              <StatusBadge status={v.status} />
+            </div>
+          ))}
         </div>
-      ))}
+      )}
     </div>
   );
 }

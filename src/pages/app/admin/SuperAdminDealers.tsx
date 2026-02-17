@@ -227,7 +227,7 @@ export default function SuperAdminDealers() {
                         {format(new Date(d.created_at), "d MMM yyyy")}
                       </td>
                       <td className="p-3">
-                        <div className="flex items-center gap-2 justify-end">
+                        <div className="flex items-center gap-2 justify-end flex-wrap">
                           <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => resendWelcome.mutate(d.id)} title="Resend welcome email">
                             <Mail className="h-3.5 w-3.5" />
                           </Button>
@@ -237,6 +237,28 @@ export default function SuperAdminDealers() {
                               <SelectItem value="active">Active</SelectItem>
                               <SelectItem value="suspended">Suspended</SelectItem>
                               <SelectItem value="pending">Pending</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Select
+                            value={d.plan_id || ""}
+                            onValueChange={async (planId) => {
+                              if (!planId) return;
+                              const planLabel = planId === "starter" ? "Starter" : planId === "professional" ? "Professional" : planId === "elite" ? "Elite" : planId;
+                              const { error } = await supabase.from("dealers").update({ plan_id: planId as any }).eq("id", d.id);
+                              if (error) { toast.error(error.message); return; }
+                              await supabase.from("audit_logs").insert({
+                                dealer_id: d.id, actor_user_id: user?.id, action_type: "PLAN_CHANGED",
+                                entity_type: "dealer", entity_id: d.id, summary: `Plan changed to ${planLabel}`,
+                              });
+                              queryClient.invalidateQueries({ queryKey: ["admin-dealers"] });
+                              toast.success(`Plan updated to ${planLabel}`);
+                            }}
+                          >
+                            <SelectTrigger className="w-32 h-7 text-xs"><SelectValue placeholder="Set Plan" /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="starter">Starter</SelectItem>
+                              <SelectItem value="professional">Professional</SelectItem>
+                              <SelectItem value="elite">Elite</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>

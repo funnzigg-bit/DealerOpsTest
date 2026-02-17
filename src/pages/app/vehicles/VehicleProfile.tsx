@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Save, Car, FileText, Shield, AlertTriangle, CheckSquare, Search as SearchIcon, User } from "lucide-react";
+import { ArrowLeft, Save, Car, FileText, Shield, AlertTriangle, CheckSquare, Search as SearchIcon, User, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,8 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useVehicle, useUpdateVehicle } from "@/hooks/useVehicles";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useCustomers } from "@/hooks/useCustomers";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -40,28 +41,81 @@ function EmptyState({ icon: Icon, label }: { icon: any; label: string }) {
 
 /* ── Linked records ── */
 
-function LinkedOwnership({ vehicleId, customerId }: { vehicleId: string; customerId: string | null }) {
+function LinkedOwnership({ vehicleId, customerId: initialCustomerId }: { vehicleId: string; customerId: string | null }) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { data: customers } = useCustomers();
+  const [selectedCustomerId, setSelectedCustomerId] = useState(initialCustomerId || "");
+  const [editing, setEditing] = useState(false);
+
   const { data, isLoading } = useQuery({
-    queryKey: ["vehicle-customer", customerId],
+    queryKey: ["vehicle-customer", initialCustomerId],
     queryFn: async () => {
-      if (!customerId) return null;
-      const { data, error } = await supabase.from("customers").select("id, first_name, last_name, phone, email").eq("id", customerId).single();
+      if (!initialCustomerId) return null;
+      const { data, error } = await supabase.from("customers").select("id, first_name, last_name, phone, email").eq("id", initialCustomerId).single();
       if (error) throw error;
       return data;
     },
-    enabled: !!customerId,
+    enabled: !!initialCustomerId,
   });
-  if (!customerId) return <EmptyState icon={User} label="No customer linked" />;
-  if (isLoading) return <div className="h-20 rounded-lg bg-muted/30 animate-pulse" />;
-  if (!data) return <EmptyState icon={User} label="Customer not found" />;
-  return (
-    <div onClick={() => navigate(`/app/customers/${data.id}`)} className="p-4 rounded-lg border border-border/50 bg-card/50 hover:bg-muted/30 cursor-pointer transition-colors">
-      <p className="text-sm font-medium">{data.first_name} {data.last_name}</p>
-      <div className="text-xs text-muted-foreground mt-1 space-y-0.5">
-        {data.phone && <p>{data.phone}</p>}
-        {data.email && <p>{data.email}</p>}
+
+  const linkCustomer = useMutation({
+    mutationFn: async (cid: string | null) => {
+      const { error } = await supabase.from("vehicles").update({ customer_id: cid || null }).eq("id", vehicleId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["vehicle-customer"] });
+      queryClient.invalidateQueries({ queryKey: ["vehicle", vehicleId] });
+      queryClient.invalidateQueries({ queryKey: ["vehicles"] });
+      toast.success("Customer linked");
+      setEditing(false);
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
+  if (editing) {
+    return (
+      <div className="p-5 rounded-xl border border-border/50 bg-card/50 space-y-3">
+        <h3 className="text-sm font-semibold">Link Customer</h3>
+        <Select value={selectedCustomerId} onValueChange={setSelectedCustomerId}>
+          <SelectTrigger><SelectValue placeholder="Select a customer" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">No customer</SelectItem>
+            {customers?.map((c: any) => (
+              <SelectItem key={c.id} value={c.id}>{c.first_name} {c.last_name}{c.phone ? ` · ${c.phone}` : ""}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <div className="flex gap-2">
+          <Button size="sm" onClick={() => linkCustomer.mutate(selectedCustomerId || null)} disabled={linkCustomer.isPending}>Save</Button>
+          <Button size="sm" variant="outline" onClick={() => setEditing(false)}>Cancel</Button>
+        </div>
       </div>
+    );
+  }
+
+  if (isLoading) return <div className="h-20 rounded-lg bg-muted/30 animate-pulse" />;
+  if (!initialCustomerId || !data) return (
+    <div className="space-y-3">
+      <EmptyState icon={User} label="No customer linked" />
+      <Button variant="outline" size="sm" onClick={() => setEditing(true)} className="w-full">
+        <Link2 className="h-3.5 w-3.5 mr-2" /> Link a Customer
+      </Button>
+    </div>
+  );
+  return (
+    <div className="space-y-3">
+      <div onClick={() => navigate(`/app/customers/${data.id}`)} className="p-4 rounded-lg border border-border/50 bg-card/50 hover:bg-muted/30 cursor-pointer transition-colors">
+        <p className="text-sm font-medium">{data.first_name} {data.last_name}</p>
+        <div className="text-xs text-muted-foreground mt-1 space-y-0.5">
+          {data.phone && <p>{data.phone}</p>}
+          {data.email && <p>{data.email}</p>}
+        </div>
+      </div>
+      <Button variant="outline" size="sm" onClick={() => setEditing(true)} className="w-full">
+        <Link2 className="h-3.5 w-3.5 mr-2" /> Change Customer
+      </Button>
     </div>
   );
 }
