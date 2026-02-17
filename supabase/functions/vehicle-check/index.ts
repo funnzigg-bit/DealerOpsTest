@@ -224,6 +224,21 @@ serve(async (req) => {
     const { vrm, dealer_id, force_fresh } = await req.json();
     if (!vrm || !dealer_id) return new Response(JSON.stringify({ error: "VRM and dealer_id are required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
+    // Security: Verify the authenticated user actually belongs to the requested dealer_id
+    const { data: userProfile, error: profileError } = await supabase
+      .from("profiles")
+      .select("dealer_id")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError || !userProfile) {
+      return new Response(JSON.stringify({ error: "User profile not found" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    if (userProfile.dealer_id !== dealer_id) {
+      return new Response(JSON.stringify({ error: "Access denied to this dealer" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     const cleanVrm = vrm.replace(/\s/g, "").toUpperCase();
 
     // Check cache (last 6 hours) unless force_fresh

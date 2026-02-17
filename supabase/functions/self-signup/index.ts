@@ -37,8 +37,42 @@ Deno.serve(async (req) => {
       { auth: { autoRefreshToken: false, persistSession: false } }
     );
 
-    // Check if email already exists
-    const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
+    // Rate limiting: check recent signups by email (last 1 hour)
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count: recentEmailSignups } = await supabaseAdmin
+      .from("dealer_onboarding_events")
+      .select("*", { count: "exact", head: true })
+      .eq("event_type", "SELF_SIGNUP")
+      .gte("created_at", oneHourAgo)
+      .contains("payload_json", { email });
+
+    if (recentEmailSignups && recentEmailSignups >= 3) {
+      logStep("Rate limited (email)", { email });
+      return new Response(JSON.stringify({ error: "Too many signup attempts. Please try again later." }), {
+        status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Rate limiting: check recent signups by IP (last 1 hour)
+    const clientIP = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "unknown";
+    if (clientIP !== "unknown") {
+      const { count: recentIPSignups } = await supabaseAdmin
+        .from("dealer_onboarding_events")
+        .select("*", { count: "exact", head: true })
+        .eq("event_type", "SELF_SIGNUP")
+        .gte("created_at", oneHourAgo)
+        .contains("payload_json", { ip: clientIP });
+
+      if (recentIPSignups && recentIPSignups >= 5) {
+        logStep("Rate limited (IP)", { clientIP });
+        return new Response(JSON.stringify({ error: "Too many signup attempts from this location. Please try again later." }), {
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
+    // Check if email already exists (efficient lookup via filter)
+    const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers({ filter: `email.eq.${email}` });
     const emailExists = existingUsers?.users?.some(u => u.email === email);
     if (emailExists) {
       return new Response(JSON.stringify({ error: "An account with this email already exists. Please sign in instead." }), {
@@ -119,11 +153,11 @@ Deno.serve(async (req) => {
       await supabaseAdmin.from("dealers").update({ plan_id: trialPlanId }).eq("id", dealer.id);
     }
 
-    // 7. Log onboarding event
+    // 7. Log onboarding event (include IP for rate limiting)
     await supabaseAdmin.from("dealer_onboarding_events").insert({
       dealer_id: dealer.id,
       event_type: "SELF_SIGNUP",
-      payload_json: { email, plan: "trial", trial_ends_at: trialEndsAt },
+      payload_json: { email, plan: "trial", trial_ends_at: trialEndsAt, ip: clientIP },
     });
 
     // 8. Audit log
