@@ -103,8 +103,12 @@ export default function SuperAdminDealers() {
 
   const updateStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const isActive = status === "active";
-      const { error } = await supabase.from("dealers").update({ status: status as any, is_active: isActive }).eq("id", id);
+      const isActive = status === "active" || status === "trial";
+      const trialEndsAt = status === "trial" ? new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString() : null;
+      const updatePayload: any = { status: status as any, is_active: isActive };
+      // Always set trial_ends_at when switching to trial; clear it otherwise
+      if (status === "trial") updatePayload.trial_ends_at = trialEndsAt;
+      const { error } = await supabase.from("dealers").update(updatePayload).eq("id", id);
       if (error) throw error;
       await supabase.from("dealer_onboarding_events").insert({
         dealer_id: id, created_by_superadmin_user_id: user?.id,
