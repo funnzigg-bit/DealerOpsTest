@@ -3,7 +3,10 @@ import { DealerAIChat } from "./DealerAIChat";
 import { useAuth } from "@/contexts/AuthContext";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
-import { Bell, AlertTriangle, CreditCard } from "lucide-react";
+import { Bell, AlertTriangle, CreditCard, Command } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CommandPalette } from "./CommandPalette";
+import { AppBreadcrumb } from "./AppBreadcrumb";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -91,18 +94,28 @@ export function AppLayout() {
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
           <header className="h-16 flex items-center justify-between px-4 border-b border-border/30 bg-background/80 backdrop-blur-sm sticky top-0 z-40">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <SidebarTrigger />
+              <AppBreadcrumb />
             </div>
             <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground h-8 px-2.5"
+                onClick={() => document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }))}
+              >
+                <Command className="h-3 w-3" />
+                <span>Search</span>
+                <kbd className="ml-1 px-1.5 py-0.5 rounded bg-muted text-[10px] font-mono">⌘K</kbd>
+              </Button>
               <Button variant="ghost" size="icon" className="text-muted-foreground">
                 <Bell className="h-4 w-4" />
               </Button>
             </div>
           </header>
+          <CommandPalette />
           <TrialBanner />
-          <main className="flex-1 p-6">
-            <Outlet />
           </main>
         </div>
       </div>
