@@ -1,9 +1,9 @@
-import { Outlet, Navigate, Link } from "react-router-dom";
+import { Outlet, Navigate, Link, useLocation } from "react-router-dom";
 import { DealerAIChat } from "./DealerAIChat";
 import { useAuth } from "@/contexts/AuthContext";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
-import { Bell, AlertTriangle, CreditCard, Command } from "lucide-react";
+import { Bell, AlertTriangle, CreditCard, Command, LayoutDashboard, Users, Car, Target, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CommandPalette } from "./CommandPalette";
 import { AppBreadcrumb } from "./AppBreadcrumb";
@@ -72,6 +72,38 @@ function TrialBanner() {
   );
 }
 
+const mobileNavItems = [
+  { title: "Dashboard", url: "/app", icon: LayoutDashboard },
+  { title: "Customers", url: "/app/customers", icon: Users },
+  { title: "Vehicles", url: "/app/vehicles", icon: Car },
+  { title: "Leads", url: "/app/leads", icon: Target },
+  { title: "Invoices", url: "/app/invoices", icon: FileText },
+];
+
+function MobileBottomNav() {
+  const location = useLocation();
+  const isActive = (url: string) => url === "/app" ? location.pathname === "/app" : location.pathname.startsWith(url);
+
+  return (
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border/40 bg-background/95 backdrop-blur-sm">
+      <div className="flex items-center justify-around h-14">
+        {mobileNavItems.map(item => (
+          <Link
+            key={item.url}
+            to={item.url}
+            className={`flex flex-col items-center gap-0.5 px-2 py-1.5 transition-colors ${
+              isActive(item.url) ? "text-primary" : "text-muted-foreground"
+            }`}
+          >
+            <item.icon className="h-5 w-5" />
+            <span className="text-[10px] font-medium">{item.title}</span>
+          </Link>
+        ))}
+      </div>
+    </nav>
+  );
+}
+
 export function AppLayout() {
   const { user, loading } = useAuth();
 
@@ -115,11 +147,12 @@ export function AppLayout() {
           </header>
           <CommandPalette />
           <TrialBanner />
-          <main className="flex-1 p-6">
+          <main className="flex-1 p-6 pb-20 md:pb-6">
             <Outlet />
           </main>
         </div>
       </div>
+      <MobileBottomNav />
       <DealerAIChat />
     </SidebarProvider>
   );
