@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import {
   Users, Car, FileText, Shield, Wrench, Star, BarChart3,
   ClipboardCheck, MessageSquare, Briefcase, Bell, CarFront, Search, PenTool,
-  ArrowRight, CheckCircle2, ImageIcon, ShieldAlert, PackageCheck, Target,
+  ArrowRight, CheckCircle2, ShieldAlert, PackageCheck, Target,
   FolderOpen, TrendingUp, UsersRound, ScrollText, LayoutDashboard, Bot
 } from "lucide-react";
 import dashboardPreview from "@/assets/dashboard-preview.png";
