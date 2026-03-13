@@ -206,7 +206,7 @@ export default function Index() {
 
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.1] mb-6">
               Run your dealership{" "}
-              <span className="text-gradient">with confidence</span>
+              <span className="text-gradient">with ease</span>
             </h1>
 
             <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
